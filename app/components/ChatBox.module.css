@@ -1,0 +1,63 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background-color: #333;
+    color: white;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.textarea {
+    width: 100%;
+    height: 150px;
+    margin-bottom: 10px;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    resize: none;
+    color: black;
+}
+
+.fileInput {
+    margin-bottom: 10px;
+    color: white;
+}
+
+.button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: #ffcc00;
+    color: #333;
+    cursor: pointer;
+}
+
+.button:hover {
+    background-color: #e6b800;
+}
+
+.messages {
+    flex-grow: 1;
+    overflow-y: auto;
+    margin-bottom: 10px;
+    padding-right: 10px;
+
+}
+
+.message {
+    background-color: #444;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    word-wrap: break-word;
+}
+
+.errorMessage {
+    background-color: #b00020;
+}
+
+.error {
+    color: #ffcc00;
+    margin-top: 10px;
+}

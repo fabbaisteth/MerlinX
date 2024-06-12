@@ -1,0 +1,16 @@
+.userSettings {
+    display: flex;
+    align-items: center;
+    margin-right: 20px;
+}
+
+.userPicture {
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.settingsIcon {
+    color: white;
+    cursor: pointer;
+    font-size: 24px;
+}

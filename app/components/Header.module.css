@@ -1,0 +1,50 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background-color: #333;
+  color: white;
+}
+
+.logoContainer {
+  display: flex;
+  align-items: center;
+}
+
+.logo {
+  width: auto;
+  height: auto;
+}
+
+.rightContainer {
+  display: flex;
+  align-items: center;
+}
+
+.buttonContainer {
+  display: flex;
+}
+
+.button {
+  margin-left: 10px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  background-color: white;
+  color: #333;
+  cursor: pointer;
+}
+
+.signupButton {
+  background-color: #ffcc00;
+  color: #333;
+}
+
+.button:hover {
+  background-color: #e6e6e6;
+}
+
+.signupButton:hover {
+  background-color: #e6b800;
+}
