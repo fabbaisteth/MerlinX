@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useRef } from 'react';
 import styles from './HtmlTemplate.module.css';
 
@@ -20,7 +22,7 @@ const HtmlTemplate: React.FC<HtmlTemplateProps> = ({ code }) => {
   return (
     <div className={styles.container}>
       <h3>HTML Template</h3>
-      <iframe ref={iframeRef} style={{ width: '100%', height: '100%' }}></iframe>
+      <iframe ref={iframeRef} style={{ width: '100%', height: '400px', border: 'none' }}></iframe>
     </div>
   );
 };

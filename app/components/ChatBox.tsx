@@ -12,6 +12,11 @@ interface Message {
   isError?: boolean;
 }
 
+interface OpenAIMessage {
+  role: string;
+  content: string | Array<{ type: string; text?: string; image_url?: { url: string } }>;
+}
+
 const ChatBox: React.FC<ChatBoxProps> = ({ setCode }) => {
   const [prompt, setPrompt] = useState<string>('');
   const [messages, setMessages] = useState<Array<Message>>([
@@ -20,24 +25,26 @@ const ChatBox: React.FC<ChatBoxProps> = ({ setCode }) => {
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async () => {
-    console.log(process.env.NEXT_PUBLIC_GPT_API_KEY);
     try {
-      const content = [
-        { type: 'text', text: prompt },
-      ];
-
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_GPT_API_KEY}`
+          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_GPT_API_KEY}`,
         },
         body: JSON.stringify({
           model: 'gpt-4-turbo',
           messages: [
             {
               role: 'user',
-              content,
+              content: [
+                { type: 'text', text: prompt },
+                { type: 'text', text: 'Please turn the design into HTML code, your answer should contain only html code and tstart with <html> tag and end with </html> tag.' },
+                {
+                  type: 'image_url',
+                  image_url: { url: 'https://res.cloudinary.com/dyc96l5su/image/upload/v1718269072/v0gx0kcvzqz4ryke7qkd.png' },
+                },
+              ],
             },
           ],
           max_tokens: 300,
@@ -49,7 +56,9 @@ const ChatBox: React.FC<ChatBoxProps> = ({ setCode }) => {
       }
 
       const data = await response.json();
-      setCode(data.choices[0].message?.content || '');
+      const openAIResponse = data.choices[0].message?.content || '';
+
+      setCode(openAIResponse);
 
       // Add the new message to the chat
       setMessages([...messages, { text: prompt }]);
