@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, KeyboardEvent } from 'react';
+import { useState, KeyboardEvent, ChangeEvent } from 'react';
 import styles from './ChatBox.module.css';
 
 interface ChatBoxProps {
@@ -19,13 +19,71 @@ interface OpenAIMessage {
 
 const ChatBox: React.FC<ChatBoxProps> = ({ setCode }) => {
   const [prompt, setPrompt] = useState<string>('');
+  const [image, setImage] = useState<File | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [messages, setMessages] = useState<Array<Message>>([
     { text: 'Hello! How can I help you today?' },
   ]);
   const [error, setError] = useState<string | null>(null);
+  const [response, setResponse] = useState<string | null>(null);
+
+  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setImage(e.target.files[0]);
+    }
+  };
+
+  const uploadImageToServer = async (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await fetch('/api/upload', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to upload image');
+    }
+
+    const data = await response.json();
+    // setResponse(data);
+    setImageUrl(data.fileName.imageUrl);
+    console.log(data.fileName.imageUrl);
+    return data.fileName.imageUrl; // Assuming the API returns the file URL
+  };
+
+  const handleImageUpload = async () => {
+    if (image) {
+      try {
+        const imageUrl = await uploadImageToServer(image);
+        setImageUrl(imageUrl);
+        setError(null);
+      } catch (err: any) {
+        setError(err.message || 'Failed to upload image. Please try again.');
+      }
+    }
+  };
 
   const handleSubmit = async () => {
     try {
+      const content = [
+        { type: 'text', text: prompt },
+        ...(imageUrl ? [{ type: 'image_url', image_url: { url: imageUrl } }] : []),
+      ];
+
+      const openAIMessages: OpenAIMessage[] = [
+        {
+          role: 'system',
+          content:
+            'You are a web developer that answers strictly with code. Respond with HTML code only. Do not include any markdown formatting or code block markers. You will be asked to turn designs from images into usable code.',
+        },
+        {
+          role: 'user',
+          content,
+        },
+      ];
+
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -34,20 +92,8 @@ const ChatBox: React.FC<ChatBoxProps> = ({ setCode }) => {
         },
         body: JSON.stringify({
           model: 'gpt-4-turbo',
-          messages: [
-            {
-              role: 'user',
-              content: [
-                { type: 'text', text: prompt },
-                { type: 'text', text: 'Please turn the design into HTML code, your answer should contain only html code and tstart with <html> tag and end with </html> tag.' },
-                {
-                  type: 'image_url',
-                  image_url: { url: 'https://res.cloudinary.com/dyc96l5su/image/upload/v1718269072/v0gx0kcvzqz4ryke7qkd.png' },
-                },
-              ],
-            },
-          ],
-          max_tokens: 300,
+          messages: openAIMessages,
+          max_tokens: 1000,
         }),
       });
 
@@ -63,6 +109,8 @@ const ChatBox: React.FC<ChatBoxProps> = ({ setCode }) => {
       // Add the new message to the chat
       setMessages([...messages, { text: prompt }]);
       setPrompt('');
+      setImage(null);
+      setImageUrl(null);
       setError(null);
     } catch (err: any) {
       setMessages([...messages, { text: prompt, isError: true }]);
@@ -97,9 +145,31 @@ const ChatBox: React.FC<ChatBoxProps> = ({ setCode }) => {
         onKeyDown={handleKeyDown}
         placeholder="Enter your prompt"
       />
-      <button className={styles.button} onClick={handleSubmit}>
-        Submit
-      </button>
+      <input
+        type="file"
+        accept="image/*"
+        onChange={handleImageChange}
+      />
+      <div className={styles.buttonContainer}>
+        <button className={styles.button} onClick={handleImageUpload}>
+          Upload Image
+        </button>
+        <button className={styles.button} onClick={handleSubmit}>
+          Submit
+        </button>
+      </div>
+      {imageUrl && (
+        <div className={styles.preview}>
+          <h3>Preview:</h3>
+          <img src={imageUrl} alt="Uploaded Preview" className={styles.imagePreview} />
+        </div>
+      )}
+      {response && (
+        <div className={styles.response}>
+          <h4>OpenAI Response:</h4>
+          <p>{response}</p>
+        </div>
+      )}
     </div>
   );
 };

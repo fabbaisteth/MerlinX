@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import HtmlTemplate from './HtmlTemplate';
 import styles from './PreRender.module.css';
 import { v4 as uuidv4 } from 'uuid';
 
 interface PreRenderProps {
   initialCode: string;
+  onSave: (code: string) => void;
 }
 
 interface SavedCode {
@@ -14,7 +14,7 @@ interface SavedCode {
   code: string;
 }
 
-const PreRender: React.FC<PreRenderProps> = ({ initialCode }) => {
+const PreRender: React.FC<PreRenderProps> = ({ initialCode, onSave }) => {
   const [code, setCode] = useState<string>(initialCode);
   const [savedCodes, setSavedCodes] = useState<SavedCode[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(0);
@@ -39,6 +39,7 @@ const PreRender: React.FC<PreRenderProps> = ({ initialCode }) => {
     const newSavedCode = { id, code };
     setSavedCodes([newSavedCode, ...savedCodes]);
     setCurrentPage(0);
+    onSave(code);
   };
 
   const handleInsertButton = () => {
@@ -46,9 +47,7 @@ const PreRender: React.FC<PreRenderProps> = ({ initialCode }) => {
     setCode(newCode);
   };
 
-  const codesPerPage = 5;
-  const startIndex = currentPage * codesPerPage;
-  const paginatedCodes = savedCodes.slice(startIndex, startIndex + codesPerPage);
+
 
   return (
     <div className={styles.container}>
@@ -64,21 +63,7 @@ const PreRender: React.FC<PreRenderProps> = ({ initialCode }) => {
       <button className={styles.insertButton} onClick={handleInsertButton}>
         Insert Button
       </button>
-      <HtmlTemplate code={code} />
-      <div className={styles.pagination}>
-        {Array.from({ length: Math.ceil(savedCodes.length / codesPerPage) }, (_, i) => (
-          <button key={i} onClick={() => setCurrentPage(i)} disabled={i === currentPage}>
-            {i + 1}
-          </button>
-        ))}
-      </div>
-      <div className={styles.savedCodes}>
-        {paginatedCodes.map((savedCode) => (
-          <div key={savedCode.id} className={styles.savedCode}>
-            <pre>{savedCode.code}</pre>
-          </div>
-        ))}
-      </div>
+
     </div>
   );
 };

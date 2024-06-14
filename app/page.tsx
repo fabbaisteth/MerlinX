@@ -5,10 +5,16 @@ import ChatBox from './components/ChatBox';
 import PreRender from './components/PreRender';
 import HtmlTemplate from './components/HtmlTemplate';
 import Header from './components/Header';
+import { v4 as uuidv4 } from 'uuid';
 
 const Page = () => {
   const [code, setCode] = useState<string>('');
+  const [savedCodes, setSavedCodes] = useState<Array<{ id: string; code: string }>>([]);
 
+  const handleSaveCode = (newCode: string) => {
+    const newSavedCode = { id: uuidv4(), code: newCode };
+    setSavedCodes((prevCodes) => [newSavedCode, ...prevCodes]);
+  };
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
       <Header />
@@ -17,10 +23,10 @@ const Page = () => {
           <ChatBox setCode={setCode} />
         </div>
         <div style={{ flex: 2, borderRight: '1px solid #ccc', padding: '20px' }}>
-          <HtmlTemplate code={code} />
+          <HtmlTemplate savedCodes={savedCodes} />
         </div>
         <div style={{ flex: 1, padding: '20px' }}>
-          <PreRender initialCode={code} />
+          <PreRender initialCode={code} onSave={handleSaveCode} />
         </div>
       </div>
     </div>
