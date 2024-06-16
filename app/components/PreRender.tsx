@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import styles from './PreRender.module.css';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -42,16 +42,9 @@ const PreRender: React.FC<PreRenderProps> = ({ initialCode, onSave }) => {
     onSave(code);
   };
 
-  const handleInsertButton = () => {
-    const newCode = code.replace('<!-- INSERT BUTTON HERE -->', '<button>New Button</button>');
-    setCode(newCode);
-  };
-
-
-
   return (
     <div className={styles.container}>
-      <h3>Pre-rendered Code</h3>
+      <h3 className='mb-5'>Pre-rendered Code</h3>
       <textarea
         className={styles.codeBlock}
         value={code}
@@ -60,10 +53,6 @@ const PreRender: React.FC<PreRenderProps> = ({ initialCode, onSave }) => {
       <button className={styles.saveButton} onClick={handleSave}>
         Save Code
       </button>
-      <button className={styles.insertButton} onClick={handleInsertButton}>
-        Insert Button
-      </button>
-
     </div>
   );
 };
