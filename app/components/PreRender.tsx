@@ -55,7 +55,7 @@ const PreRender: React.FC<PreRenderProps> = ({ initialCode, onSave }) => {
         {isCollapsed ? 'Show code' : 'Collapse code'}
       </button>
       <div className={`${styles.container} ${isCollapsed ? styles.collapsed : ''}`}>
-        <h3 className='mb-5'>Pre-rendered Code</h3>
+        <h3 className='mb-5 font-semibold'>Pre-rendered Code</h3>
         <textarea
           className={styles.codeBlock}
           value={code}
