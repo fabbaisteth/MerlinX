@@ -57,71 +57,74 @@ const ChatBox: React.FC<ChatBoxProps> = ({ setCode }) => {
   };
 
   const handleSubmit = async () => {
+    try {
+      let finalImageUrl = imageUrl;
 
-    if (image) {
-      try {
-        const imageUrl = await uploadImageToServer(image);
-        setImageUrl(imageUrl);
-        setError(null);
-        const content = [
-          ...(prevCode ? [{ type: 'text', text: prevCode }] : []),
-          { type: 'text', text: prompt },
-          ...(imageUrl ? [{ type: 'image_url', image_url: { url: imageUrl } }] : []),
-        ];
-
-        const openAIMessages: OpenAIMessage[] = [
-          {
-            role: 'system',
-            content:
-              `You are an experienced web developer and can quickly generate valid HTML, CSS and JAVASCRIPT.
-             I want you to help me write a single HTML file that includes any required CSS and javascript to make the file render a valid and useable website. 
-             I will provide instructions that describe the website that i want you to help me produce. 
-             i will also include html of the website that i currently have and your job will be to refelct on the "current" HTML plus the provided instructions and return an updated HTML file.
-             Any images or other assets that are required to make the website look like the instructions should by grey placeholder SVGs.
-             Return ONLY the file as a code block with nothing else. Your output needs to be valid HTML (including any required CSS and javascript) ONLY. 
-             Exclude any markdown or code markers in your response. Pick colours and fonts that reflect any instructions provided.`
-          },
-          {
-            role: 'user',
-            content,
-          },
-        ];
-
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_GPT_API_KEY}`,
-          },
-          body: JSON.stringify({
-            model: 'gpt-4-turbo',
-            messages: openAIMessages,
-            max_tokens: 2000,
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error(`OpenAI API error: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-        const openAIResponse = data.choices[0].message?.content || '';
-
-        setPrevCode(openAIResponse);
-        setCode(openAIResponse);
-
-        // Add the new message to the chat
-        setMessages([...messages, { text: prompt }]);
-        setPrompt('');
-        setImage(null);
-        setImageUrl(null);
-        setError(null);
-      } catch (err: any) {
-        setMessages([...messages, { text: prompt, isError: true }]);
-        setError(err.message || 'Failed to send message. Please try again.');
+      // Upload the image if there is a new one
+      if (image) {
+        finalImageUrl = await uploadImageToServer(image);
+        setImageUrl(finalImageUrl);
       }
+
+      const content = [
+        ...(prevCode ? [{ type: 'text', text: prevCode }] : []),
+        { type: 'text', text: prompt },
+        ...(finalImageUrl ? [{ type: 'image_url', image_url: { url: finalImageUrl } }] : []),
+      ];
+
+      const openAIMessages: OpenAIMessage[] = [
+        {
+          role: 'system',
+          content:
+            `You are an experienced web developer and can quickly generate valid HTML, CSS and JAVASCRIPT.
+           I want you to help me write a single HTML file that includes any required CSS and javascript to make the file render a valid and useable website. 
+           I will provide instructions that describe the website that i want you to help me produce. 
+           i will also include html of the website that i currently have and your job will be to refelct on the "current" HTML plus the provided instructions and return an updated HTML file.
+           Any images or other assets that are required to make the website look like the instructions should by grey placeholder SVGs.
+           Return ONLY the file as a code block with nothing else. Your output needs to be valid HTML (including any required CSS and javascript) ONLY. 
+           Exclude any markdown or code markers in your response. Pick colours and fonts that reflect any instructions provided.`
+        },
+        {
+          role: 'user',
+          content,
+        },
+      ];
+
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_GPT_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: 'gpt-4-turbo',
+          messages: openAIMessages,
+          max_tokens: 2000,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`OpenAI API error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      const openAIResponse = data.choices[0].message?.content || '';
+
+      setPrevCode(openAIResponse);
+      setCode(openAIResponse);
+
+      // Add the new message to the chat
+      setMessages([...messages, { text: prompt }]);
+      setPrompt('');
+      setImage(null);
+      setImageUrl(null);
+      setError(null);
+    } catch (err: any) {
+      setMessages([...messages, { text: prompt, isError: true }]);
+      setError(err.message || 'Failed to send message. Please try again.');
     }
   };
+
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter') {
@@ -156,12 +159,10 @@ const ChatBox: React.FC<ChatBoxProps> = ({ setCode }) => {
           accept="image/*"
           onChange={handleImageChange}
         />
-        <div className={styles.buttonContainer}>
+        <button className={styles.button} onClick={handleSubmit}>
+          Submit
+        </button>
 
-          <button className={styles.button} onClick={handleSubmit}>
-            Submit
-          </button>
-        </div>
       </div>
       {imageUrl && (
         <div className={styles.preview}>
