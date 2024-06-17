@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './PreRender.module.css';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -17,7 +17,7 @@ interface SavedCode {
 const PreRender: React.FC<PreRenderProps> = ({ initialCode, onSave }) => {
   const [code, setCode] = useState<string>(initialCode);
   const [savedCodes, setSavedCodes] = useState<SavedCode[]>([]);
-  const [currentPage, setCurrentPage] = useState<number>(0);
+  const [isCollapsed, setIsCollapsed] = useState<boolean>(true);
 
   useEffect(() => {
     const storedCodes = localStorage.getItem('savedCodes');
@@ -34,26 +34,35 @@ const PreRender: React.FC<PreRenderProps> = ({ initialCode, onSave }) => {
     setCode(initialCode);
   }, [initialCode]);
 
-  const handleSave = () => {
-    const id = uuidv4();
-    const newSavedCode = { id, code };
-    setSavedCodes([newSavedCode, ...savedCodes]);
-    setCurrentPage(0);
-    onSave(code);
+  useEffect(() => {
+    if (code.trim() !== '') {
+      const id = uuidv4();
+      const newSavedCode = { id, code };
+      setSavedCodes([newSavedCode, ...savedCodes]);
+      onSave(code);
+    }
+  }, [code, onSave, savedCodes]);
+
+
+
+  const toggleCollapse = () => {
+    setIsCollapsed(!isCollapsed);
   };
 
   return (
-    <div className={styles.container}>
-      <h3 className='mb-5'>Pre-rendered Code</h3>
-      <textarea
-        className={styles.codeBlock}
-        value={code}
-        onChange={(e) => setCode(e.target.value)}
-      />
-      <button className={styles.saveButton} onClick={handleSave}>
-        Save Code
+    <>
+      <button className={styles.collapseButton} onClick={toggleCollapse}>
+        {isCollapsed ? 'Show code' : 'Collapse code'}
       </button>
-    </div>
+      <div className={`${styles.container} ${isCollapsed ? styles.collapsed : ''}`}>
+        <h3 className='mb-5'>Pre-rendered Code</h3>
+        <textarea
+          className={styles.codeBlock}
+          value={code}
+          onChange={(e) => setCode(e.target.value)}
+        />
+      </div>
+    </>
   );
 };
 

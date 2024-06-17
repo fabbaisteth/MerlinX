@@ -22,12 +22,11 @@ const Page = () => {
         <div style={{ flex: 1, borderRight: '1px solid #ccc' }}>
           <ChatBox setCode={setCode} />
         </div>
-        <div style={{ flex: 2, borderRight: '1px solid #ccc', padding: '20px' }}>
+        <div style={{ flex: 3, padding: '20px' }}>
           <HtmlTemplate savedCodes={savedCodes} />
         </div>
-        <div style={{ flex: 1, padding: '20px' }}>
-          <PreRender initialCode={code} onSave={handleSaveCode} />
-        </div>
+        <PreRender initialCode={code} onSave={handleSaveCode} />
+
       </div>
     </div>
   );
