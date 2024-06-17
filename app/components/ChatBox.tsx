@@ -2,6 +2,7 @@
 
 import { useState, KeyboardEvent, ChangeEvent } from 'react';
 import styles from './ChatBox.module.css';
+import Image from 'next/image';
 
 interface ChatBoxProps {
   setCode: (code: string) => void;
@@ -20,13 +21,14 @@ interface OpenAIMessage {
 const ChatBox: React.FC<ChatBoxProps> = ({ setCode }) => {
   const [prompt, setPrompt] = useState<string>('');
   const [image, setImage] = useState<File | null>(null);
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>("https://merlinx.s3.eu-north-1.amazonaws.com/image/png-1718371089823");
   const [messages, setMessages] = useState<Array<Message>>([
     { text: 'Hello! How can I help you today?' },
   ]);
   const [prevCode, setPrevCode] = useState<string>(''); // Store the previous code
   const [error, setError] = useState<string | null>(null);
   const [response, setResponse] = useState<string | null>(null);
+  const isValidImageUrl = imageUrl && imageUrl !== 'https://merlinx.s3.eu-north-1.amazonaws.com/image/png-1718371089823';
 
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -74,7 +76,8 @@ const ChatBox: React.FC<ChatBoxProps> = ({ setCode }) => {
               `You are an experienced web developer and can quickly generate valid HTML, CSS and JAVASCRIPT.
              I want you to help me write a single HTML file that includes any required CSS and javascript to make the file render a valid and useable website. 
              I will provide instructions that describe the website that i want you to help me produce. 
-             i will also include html of the website that i currently have and your job will be to refelct on the "current" HTML plus the provided instructions and return an updated HTML file. 
+             i will also include html of the website that i currently have and your job will be to refelct on the "current" HTML plus the provided instructions and return an updated HTML file.
+             Any images or other assets that are required to make the website look like the instructions should by grey placeholder SVGs.
              Return ONLY the file as a code block with nothing else. Your output needs to be valid HTML (including any required CSS and javascript) ONLY. 
              Exclude any markdown or code markers in your response. Pick colours and fonts that reflect any instructions provided.`
           },
@@ -162,9 +165,18 @@ const ChatBox: React.FC<ChatBoxProps> = ({ setCode }) => {
       </div>
       {imageUrl && (
         <div className={styles.preview}>
-          <h3>Preview:</h3>
-          <img src={imageUrl} alt="Uploaded Preview" className={styles.imagePreview} />
-        </div>
+          {isValidImageUrl ? (
+            <Image
+              src={imageUrl}
+              alt="Uploaded Preview"
+              unoptimized
+              width={100}
+              height={50}
+              className={styles.imagePreview}
+            />
+          ) : (
+            <p>No image uploaded</p>
+          )} </div>
       )}
       {response && (
         <div className={styles.response}>
